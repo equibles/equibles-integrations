@@ -1,0 +1,761 @@
+{
+ "search_listings": {
+  "path": "/v1/listings",
+  "summary": "Find listings by company name or ticker (query), by ISIN (isin), or list every listing of one market (exchange or market), across US and other exchanges. A US listing is its bare ticker and a listing on another exchange is MIC:TICKER, the spelling every price and company route accepts. An ISIN retur",
+  "parameters": [
+   {
+    "name": "query",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Company name or ticker to search for (e.g. siemens, ASML or XETR:SIE)."
+   },
+   {
+    "name": "isin",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "ISIN to look up (e.g. IE00B5BMR087); cannot be combined with query."
+   },
+   {
+    "name": "exchange",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Market identifier code to keep (e.g. XETR, XAMS, XLIS); with neither query nor isin it lists that exchange. GET /v1/markets lists the codes."
+   },
+   {
+    "name": "market",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "ISO country code whose listings to list (e.g. US, DE, PT); cannot be combined with query, isin or exchange."
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Maximum rows to return (1\u2013500; default varies per endpoint)."
+   },
+   {
+    "name": "offset",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Rows to skip before the first returned row (default 0)."
+   }
+  ]
+ },
+ "get_stock_profile": {
+  "path": "/v1/stocks/{ticker}",
+  "summary": "One listing's profile: the company's description, website, sector and industry, CIK, LEI and fiscal year end, the security's ISIN and type, and the company's other listings on every covered exchange.",
+  "parameters": [
+   {
+    "name": "ticker",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Exact listed ticker (e.g. AAPL or BRK-B), or MIC:TICKER for a listing on another exchange (e.g. XETR:SIE)."
+   }
+  ]
+ },
+ "get_stock_prices": {
+  "path": "/v1/stocks/{ticker}/prices",
+  "summary": "Stored daily OHLCV price history for a stock, newest first, in currency: US dollars for a US listing, and for a listing on another exchange (MIC:TICKER) its trading currency in major units (pounds, not pence). Zero-volume carry-forward candles are excluded because they do not establish a traded mark",
+  "parameters": [
+   {
+    "name": "ticker",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Exact listed ticker (e.g. GOOG, GOOGL, BRK-A, or BRK-B), or MIC:TICKER for a listing on another exchange (e.g. XETR:SIE or XLON:BP). Each listing has an independent price series; dot class-share spell"
+   },
+   {
+    "name": "startDate",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Start date (yyyy-MM-dd, defaults to 1 year ago)."
+   },
+   {
+    "name": "endDate",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "End date (yyyy-MM-dd, defaults to today)."
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Maximum rows to return (1\u2013500; default varies per endpoint)."
+   },
+   {
+    "name": "offset",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Rows to skip before the first returned row (default 0)."
+   },
+   {
+    "name": "interval",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "daily (default), weekly or monthly. Weekly (ISO week) and monthly bars roll up the daily bars: first open, highest high, lowest low, last close and adjusted close, summed volume, dated by their last s"
+   }
+  ]
+ },
+ "get_financial_statement": {
+  "path": "/v1/stocks/{ticker}/financial-statements/{statement}",
+  "summary": "A company's income statement, balance sheet, or cash-flow statement for one fiscal period, sourced from structured SEC XBRL. Values use the latest restatement per line. Quarterly flow rows are discrete quarters; exact quarters derived from cumulative facts in one currency are marked derived.",
+  "parameters": [
+   {
+    "name": "ticker",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Stock ticker symbol (e.g. AAPL), or MIC:TICKER for a company listed on another exchange (e.g. XAMS:ASML)."
+   },
+   {
+    "name": "statement",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "income, balance, or cashflow. The aliases is, pnl, bs, and cf also work."
+   },
+   {
+    "name": "year",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Optional fiscal year. Omit with period to use the latest available period."
+   },
+   {
+    "name": "period",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Optional fiscal period: FY or Q1 through Q4."
+   }
+  ]
+ },
+ "search_company_filings": {
+  "path": "/v1/stocks/{ticker}/filings/search",
+  "summary": "Hybrid keyword and semantic search across one company's SEC filings and earnings call transcripts. When too few excerpts match every query word, the search automatically broadens to match any of the words \u2014 precise matches keep their rank and broader hits only fill the remainder.",
+  "parameters": [
+   {
+    "name": "ticker",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Company ticker symbol (e.g. AAPL)."
+   },
+   {
+    "name": "query",
+    "in": "query",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Search query \u2014 plain keywords or a short natural-language phrase (required). Concise, filing-phrased terms (e.g. 'Data Center revenue') still rank best."
+   },
+   {
+    "name": "documentType",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Document type filter \u2014 one value or a comma-separated list (e.g. TenK,TenQ), by value or form label (e.g. 10-K)."
+   },
+   {
+    "name": "startDate",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Earliest filing date (yyyy-MM-dd)."
+   },
+   {
+    "name": "endDate",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Latest filing date (yyyy-MM-dd)."
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Maximum excerpts to return (default 5, max 500)."
+   },
+   {
+    "name": "match",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "How the query matches: ranked (default) for relevance-ranked retrieval that broadens to any of the words when results are sparse, or phrase for only the excerpts containing the query's words consecuti"
+   }
+  ]
+ },
+ "search_all_filings": {
+  "path": "/v1/filings/search",
+  "summary": "Hybrid keyword and semantic search across all companies' SEC filings and earnings call transcripts. Returns matching excerpts with their document ids. When too few excerpts match every query word, the search automatically broadens to match any of the words \u2014 precise matches keep their rank and broad",
+  "parameters": [
+   {
+    "name": "query",
+    "in": "query",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Search query \u2014 plain keywords or a short natural-language phrase (required). Concise, filing-phrased terms (e.g. 'Data Center revenue') still rank best."
+   },
+   {
+    "name": "documentType",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Document type filter \u2014 one value or a comma-separated list (e.g. TenK,TenQ), by value or form label (e.g. 10-K)."
+   },
+   {
+    "name": "startDate",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Earliest filing date (yyyy-MM-dd)."
+   },
+   {
+    "name": "endDate",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Latest filing date (yyyy-MM-dd)."
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Maximum excerpts to return (default 5, max 500)."
+   },
+   {
+    "name": "excludeTickers",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Tickers whose filings are excluded from the results \u2014 one value or a comma-separated list (e.g. AAPL,MSFT). Use when a company's own filings would dominate the results for a query about its market."
+   },
+   {
+    "name": "maxResultsPerCompany",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": 0,
+    "description": "Maximum excerpts from any single company (default 0 = unlimited). Set a small value to spread results across more companies for discovery-style queries."
+   },
+   {
+    "name": "match",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "How the query matches: ranked (default) for relevance-ranked retrieval that broadens to any of the words when results are sparse, or phrase for only the excerpts containing the query's words consecuti"
+   }
+  ]
+ },
+ "read_filing_lines": {
+  "path": "/v1/filings/{documentId}/lines",
+  "summary": "A range of numbered text lines from one filing or transcript.",
+  "parameters": [
+   {
+    "name": "documentId",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Document id from the filings list."
+   },
+   {
+    "name": "startLine",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "First line to read (1-based, inclusive; required)."
+   },
+   {
+    "name": "endLine",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Last line to read (1-based, inclusive; required, capped at the document's last line; a window wider than 500 lines returns its first 500 with hasMore)."
+   }
+  ]
+ },
+ "list_investor_events": {
+  "path": "/v1/stocks/{ticker}/investor-events",
+  "summary": "A company's investor events \u2014 earnings calls plus other webcast events (conferences, investor days, shareholder meetings) \u2014 newest first. Event ids feed the per-event speakers and slides endpoints.",
+  "parameters": [
+   {
+    "name": "ticker",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Company ticker symbol (e.g. AAPL), or MIC:TICKER for a company listed on another exchange (e.g. XLIS:NOS)."
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Maximum rows to return (1\u2013500; default varies per endpoint)."
+   },
+   {
+    "name": "offset",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Rows to skip before the first returned row (default 0)."
+   },
+   {
+    "name": "eventType",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Optional event type: EarningsCall, CapitalMarketsDay, InvestorUpdate, AGM, Conference, FiresideChat, or MAndA."
+   },
+   {
+    "name": "includeUncaptured",
+    "in": "query",
+    "required": false,
+    "type": "boolean",
+    "enum": null,
+    "default": false,
+    "description": "Also return events hidden because none of their materials could be captured and still on the company's own IR calendar (default false); such rows carry isTombstoned=true."
+   }
+  ]
+ },
+ "get_earnings_call_transcript": {
+  "path": "/v1/stocks/{ticker}/earnings-calls/{fiscalYear}/{fiscalQuarter}/speakers",
+  "summary": "The speaker-labelled transcript of a fiscal quarter's earnings call \u2014 every turn in order, attributed to the real person only when the identity resolution is trusted. Long calls page via offset; totalTurnCount and hasMore signal the remainder.",
+  "parameters": [
+   {
+    "name": "ticker",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Company ticker symbol (e.g. AAPL), or MIC:TICKER for a company listed on another exchange (e.g. XLIS:NOS)."
+   },
+   {
+    "name": "fiscalYear",
+    "in": "path",
+    "required": true,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Fiscal year the quarter belongs to (e.g. 2025)."
+   },
+   {
+    "name": "fiscalQuarter",
+    "in": "path",
+    "required": true,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Fiscal quarter, 1-4."
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Maximum speaker turns to return (default 50, max 200; zero or negative values are rejected, values above the maximum are clamped)."
+   },
+   {
+    "name": "offset",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Speaker turns to skip before the first returned one (default 0) \u2014 pages past the per-request cap."
+   }
+  ]
+ },
+ "get_insider_transactions": {
+  "path": "/v1/stocks/{ticker}/insider-transactions",
+  "summary": "Insider transactions for a stock from SEC Forms 4/5, newest first. Form 3 establishes initial ownership rather than reporting transactions. transactionType is the coarse Buy/Sell/Award/Gift/Exercise label; transactionCode carries the filed SEC code's meaning (Conversion, Tax Payment, \u2026) \u2014 non-market",
+  "parameters": [
+   {
+    "name": "ticker",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Stock ticker symbol (e.g. AAPL)."
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Maximum rows to return (1\u2013500; default varies per endpoint)."
+   },
+   {
+    "name": "offset",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Rows to skip before the first returned row (default 0)."
+   },
+   {
+    "name": "startDate",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Only include transactions on or after this date (yyyy-MM-dd)."
+   },
+   {
+    "name": "endDate",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Only include transactions on or before this date (yyyy-MM-dd)."
+   },
+   {
+    "name": "transactionType",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Optional transaction type: Buy, Sell, Award, Conversion, Exercise, TaxPayment, Expiration, Gift, Inheritance, Discretionary, or Other. Purchase and Sale are accepted aliases."
+   },
+   {
+    "name": "insiderName",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Only include transactions whose SEC-filed insider name contains every supplied word, case-insensitively."
+   }
+  ]
+ },
+ "get_institutional_holders": {
+  "path": "/v1/stocks/{ticker}/institutional-holders",
+  "summary": "Top institutional holders (13F filers) of an exact stock or ETF listing, ranked by reported quantity. A row's\nquantity is common shares, an option position's notional underlying shares, or a\nprincipal amount, so the total is aggregate 13F exposure rather than pure ownership.\nWhile the newest quarter",
+  "parameters": [
+   {
+    "name": "ticker",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Listed security ticker (e.g. AAPL or VOO)."
+   },
+   {
+    "name": "reportDate",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "13F report date (yyyy-MM-dd, defaults to the latest available). Must be one of the stock's 13F report dates \u2014 any other date returns 400 listing the available dates."
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Maximum rows to return (1\u2013500; default varies per endpoint)."
+   },
+   {
+    "name": "offset",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Rows to skip before the first returned row (default 0)."
+   },
+   {
+    "name": "holderTypes",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Comma-separated holder type tokens to keep: adv, era, ia, bank, ins, bd, fund, plan, nonus, hc, unk (unk also matches a holder not yet classified). Totals and percentages stay over every institution."
+   },
+   {
+    "name": "styles",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Comma-separated style band tokens to keep: idx (index-like), sys (systematic-like), conc (concentrated), divact (diversified active), unk (book too small or unvalued to band). Bands come from the newe"
+   }
+  ]
+ },
+ "get_short_interest": {
+  "path": "/v1/stocks/{ticker}/short-interest",
+  "summary": "Bi-monthly FINRA short interest for an exact stock or ETF listing, newest first. Share counts are restated onto today's split basis; days to cover is as reported except that FINRA's zero-volume 999.99 placeholder returns null (the ratio is undefined) \u2014 a returned 999.99 is a genuine reading meaning ",
+  "parameters": [
+   {
+    "name": "ticker",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Listed security ticker (e.g. AAPL or VOO). Class shares use a dash (BRK-B); the dot form (BRK.B) is also accepted."
+   },
+   {
+    "name": "startDate",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Start settlement date (yyyy-MM-dd, defaults to 1 year ago)."
+   },
+   {
+    "name": "endDate",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "End settlement date (yyyy-MM-dd, defaults to today)."
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Maximum rows to return (1\u2013500; default varies per endpoint)."
+   },
+   {
+    "name": "offset",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Rows to skip before the first returned row (default 0)."
+   }
+  ]
+ },
+ "get_guidance": {
+  "path": "/v1/stocks/{ticker}/guidance",
+  "summary": "A company's earnings guidance from its Item-2.02 8-K releases and earnings-call transcripts \u2014 each guided metric with its range, unit, GAAP/non-GAAP basis, period, the verbatim disclosure, and as-announced provenance, newest release first. Revenue and diluted-EPS guidance also carries the reported a",
+  "parameters": [
+   {
+    "name": "ticker",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Stock ticker symbol (e.g. AAPL), or MIC:TICKER for a company listed on another exchange (e.g. XAMS:ASML)."
+   },
+   {
+    "name": "maxReleases",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Optional: only the newest N releases (1 or more; values above 200 read as 200). Omitted, every release on file is returned."
+   },
+   {
+    "name": "fiscalYear",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": null,
+    "description": "Optional: only guidance for a period in that fiscal year of the company's own calendar, from every release that gave it."
+   }
+  ]
+ },
+ "get_analyst_estimates": {
+  "path": "/v1/stocks/{ticker}/analyst-estimates",
+  "summary": "Read verified analyst consensus, including company, product, segment and operating forecasts with original units and publication dates. Values and period labels retain the source's units and accounting basis. Reading never runs a scraper.",
+  "parameters": [
+   {
+    "name": "ticker",
+    "in": "path",
+    "required": true,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Stock ticker symbol (e.g. AAPL), or MIC:TICKER for a company listed on another exchange (e.g. XAMS:ASML)."
+   },
+   {
+    "name": "metric",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Exact source metric label to keep (up to 512 characters)."
+   },
+   {
+    "name": "period",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Exact source period label to keep (up to 256 characters)."
+   },
+   {
+    "name": "dimensions",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "Exact source dimension labels to keep (up to 1024 characters)."
+   },
+   {
+    "name": "snapshotId",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "A verified snapshot ID returned in snapshots."
+   },
+   {
+    "name": "asOf",
+    "in": "query",
+    "required": false,
+    "type": "string",
+    "enum": null,
+    "default": null,
+    "description": "ISO-8601 cutoff; the snapshot must have been verified by that instant."
+   },
+   {
+    "name": "snapshotOffset",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": 0,
+    "description": "Snapshot-history offset (default 0, 0-100000); pages hold up to 10 snapshots."
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": 100,
+    "description": "Observations to return (default 100, 1-100)."
+   },
+   {
+    "name": "offset",
+    "in": "query",
+    "required": false,
+    "type": "integer",
+    "enum": null,
+    "default": 0,
+    "description": "Zero-based observation offset (default 0, 0-100000)."
+   }
+  ]
+ }
+}
