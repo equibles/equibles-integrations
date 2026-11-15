@@ -128,8 +128,9 @@ def test_a_key_pasted_with_a_trailing_newline_still_works():
     assert seen["auth"] == "Bearer eq_test"
 
 
-def test_a_key_with_an_inner_space_is_refused_with_a_message_that_does_not_quote_it():
+@pytest.mark.parametrize("key", ["eq_te st", "eq_test\u2019"])
+def test_a_key_with_an_inner_space_or_pasted_quote_is_refused_with_a_message_that_does_not_quote_it(key):
     with pytest.raises(ValueError) as error:
-        EquiblesClient(api_key="eq_te st")
+        EquiblesClient(api_key=key)
 
-    assert str(error.value) == "The Equibles API key contains a space or control character; copy it again."
+    assert str(error.value) == "The Equibles API key contains a space, control or non-ASCII character; copy it again."

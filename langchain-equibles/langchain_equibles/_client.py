@@ -39,8 +39,8 @@ class EquiblesClient:
                 "Get a free key at https://equibles.com/dashboard/apikeys."
             )
         # A bad header value makes httpx raise an error that quotes the header, key included.
-        if any(c.isspace() or not c.isprintable() for c in key):
-            raise ValueError("The Equibles API key contains a space or control character; copy it again.")
+        if any(c.isspace() or not c.isprintable() or not c.isascii() for c in key):
+            raise ValueError("The Equibles API key contains a space, control or non-ASCII character; copy it again.")
         self._http = httpx.Client(
             base_url=base_url,
             timeout=timeout,
@@ -66,7 +66,7 @@ class EquiblesClient:
         }
         try:
             response = self._http.get(path, params=query)
-        except httpx.HTTPError as error:
+        except (httpx.HTTPError, httpx.InvalidURL) as error:
             # The exception text can quote request headers, so only its type is passed on.
             raise EquiblesAPIError(0, f"Could not reach the Equibles API ({type(error).__name__}).") from None
         if not response.is_success:
