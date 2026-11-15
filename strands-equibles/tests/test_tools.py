@@ -80,3 +80,43 @@ def test_a_key_is_required(monkeypatch):
     monkeypatch.delenv("EQUIBLES_API_KEY", raising=False)
     with pytest.raises(ValueError, match="EQUIBLES_API_KEY"):
         equibles_tools()
+
+
+def test_a_dot_segment_path_value_is_refused_without_calling_the_api():
+    def handler(request):
+        raise AssertionError("the API must not be called")
+
+    result = run(_tool("search_company_filings", handler), {"ticker": "..", "query": "buyback"})
+
+    assert result["status"] == "error"
+    assert result["content"][0]["text"] == "Invalid value for ticker."
+
+
+def test_an_unreachable_api_gives_a_readable_error_result():
+    def handler(request):
+        raise httpx.ConnectError(f"failed sending {request.headers['Authorization']}")
+
+    result = run(_tool("get_stock_profile", handler), {"ticker": "NVDA"})
+
+    assert result["status"] == "error"
+    assert result["content"][0]["text"] == "Could not reach the Equibles API (ConnectError)."
+
+
+def test_a_key_pasted_with_a_trailing_newline_still_works():
+    seen = {}
+
+    def handler(request):
+        seen["auth"] = request.headers["Authorization"]
+        return httpx.Response(200, json={})
+
+    client = EquiblesClient(api_key="eq_test\n", transport=httpx.MockTransport(handler))
+    run(_make_tool(next(s for s in TOOLS if s.name == "get_stock_profile"), client), {"ticker": "NVDA"})
+
+    assert seen["auth"] == "Bearer eq_test"
+
+
+def test_a_key_with_an_inner_space_is_refused_with_a_message_that_does_not_quote_it():
+    with pytest.raises(ValueError) as error:
+        EquiblesClient(api_key="eq_te st")
+
+    assert str(error.value) == "The Equibles API key contains a space or control character; copy it again."
