@@ -41,6 +41,9 @@ class EquiblesTool(BaseTool):
         self._client = client
 
     def _run(self, *args: Any, run_manager: Any = None, **kwargs: Any) -> str:
+        # LangChain passes a plain string input positionally, after validating it as the first field.
+        if args:
+            kwargs = {self._spec.params[0].name: args[0], **kwargs}
         try:
             data = self._client.call(self._spec, kwargs)
         except EquiblesAPIError as error:
