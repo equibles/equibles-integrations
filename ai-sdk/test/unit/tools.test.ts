@@ -131,6 +131,56 @@ describe('tool execution', () => {
     expect(error.message).toBe('Could not reach the Equibles API (TypeError).');
   });
 
+  it('calls fetch as a plain function, as browser and Worker fetch require', async () => {
+    let receiver: unknown = 'unset';
+    const fetch = function (this: unknown) {
+      receiver = this;
+      return Promise.resolve(jsonResponse({}));
+    } as unknown as typeof globalThis.fetch;
+    await run('getStockProfile', { ticker: 'NVDA' }, fetch);
+    expect(receiver === undefined || receiver === globalThis).toBe(true);
+  });
+
+  it('reports a body that fails after the headers as unreachable, not as a non-JSON answer', async () => {
+    const broken = new ReadableStream({
+      start(controller) {
+        controller.error(new TypeError('terminated'));
+      },
+    });
+    const fetch = vi.fn<typeof globalThis.fetch>(async () => new Response(broken, { status: 200 }));
+    await expect(run('getStockPrices', { ticker: 'NVDA' }, fetch)).rejects.toMatchObject({
+      status: 0,
+      message: 'Could not reach the Equibles API (TypeError).',
+    });
+  });
+
+  it("rethrows the caller's abort while the body is still downloading", async () => {
+    const controller = new AbortController();
+    const fetch = vi.fn<typeof globalThis.fetch>(async () => {
+      controller.abort();
+      const body = new ReadableStream({
+        start(stream) {
+          stream.error(new DOMException('The operation was aborted.', 'AbortError'));
+        },
+      });
+      return new Response(body, { status: 200 });
+    });
+    const tool = equiblesTool('getStockProfile', { apiKey: KEY, fetch });
+    const error = await Promise.resolve(
+      tool.execute!({ ticker: 'NVDA' } as never, { ...OPTIONS, abortSignal: controller.signal }),
+    ).catch((e: unknown) => e);
+    expect(error).not.toBeInstanceOf(EquiblesAPIError);
+    expect((error as Error).name).toBe('AbortError');
+  });
+
+  it('still reports a complete non-JSON body as a non-JSON answer', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>(async () => new Response('<html>', { status: 200 }));
+    await expect(run('getStockProfile', { ticker: 'NVDA' }, fetch)).rejects.toMatchObject({
+      status: 200,
+      message: 'The Equibles API returned a non-JSON answer.',
+    });
+  });
+
   it("rethrows the caller's abort instead of reporting the API unreachable", async () => {
     const controller = new AbortController();
     controller.abort();

@@ -83,16 +83,21 @@ export class EquiblesClient {
     const url = new URL(path + (qs ? `?${qs}` : ''), this.baseUrl);
 
     const timeout = AbortSignal.timeout(this.timeoutMs);
+    // Browsers and Workers reject a native fetch called as a method of another object ("Illegal invocation").
+    const fetchImpl = this.fetchImpl;
     let response: Response;
+    let text: string;
     try {
-      response = await this.fetchImpl(url, {
+      response = await fetchImpl(url, {
         headers: {
           Authorization: `Bearer ${this.key}`,
           Accept: 'application/json',
           'User-Agent': '@equibles/ai-sdk',
         },
-        signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+        signal: combine(signal, timeout),
       });
+      // The body can still fail after the headers: an abort, the timeout or a dropped connection.
+      text = await response.text();
     } catch (error) {
       if (signal?.aborted) throw error;
       // The error text can quote request headers, so only its name is passed on.
@@ -100,21 +105,26 @@ export class EquiblesClient {
       throw new EquiblesAPIError(0, `Could not reach the Equibles API (${name}).`);
     }
 
-    if (!response.ok) throw await errorFrom(response);
+    if (!response.ok) throw errorFrom(response, text);
     try {
-      return await response.json();
+      return JSON.parse(text) as unknown;
     } catch {
       throw new EquiblesAPIError(response.status, 'The Equibles API returned a non-JSON answer.');
     }
   }
 }
 
+function combine(signal: AbortSignal | undefined, timeout: AbortSignal): AbortSignal {
+  if (!signal) return timeout;
+  // AbortSignal.any needs Node 20.3 or Safari 17.4; older runtimes keep the caller's signal alone.
+  return typeof AbortSignal.any === 'function' ? AbortSignal.any([signal, timeout]) : signal;
+}
+
 function readEnv(name: string): string | undefined {
   return typeof process === 'undefined' ? undefined : process.env?.[name];
 }
 
-async function errorFrom(response: Response): Promise<EquiblesAPIError> {
-  const text = await response.text().catch(() => '');
+function errorFrom(response: Response, text: string): EquiblesAPIError {
   try {
     const error = (JSON.parse(text) as { error?: { message?: unknown; code?: unknown } })?.error;
     if (error && typeof error.message === 'string' && error.message) {

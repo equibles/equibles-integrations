@@ -8,7 +8,7 @@
 npm install @equibles/ai-sdk ai
 ```
 
-Works with AI SDK 5, 6 and 7, on Node.js 20 or later and other runtimes with `fetch`.
+Works with AI SDK 5, 6 and 7, on Node.js 20.3 or later and other runtimes with `fetch`.
 
 ## API key
 
