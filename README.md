@@ -6,17 +6,25 @@ Agent-framework packages for the [Equibles](https://equibles.com) financial data
 |---|---|---|
 | [langchain-equibles](langchain-equibles) | LangChain | `pip install langchain-equibles` |
 | [strands-equibles](strands-equibles) | Strands Agents | `pip install strands-equibles` |
+| [@equibles/ai-sdk](ai-sdk) | Vercel AI SDK | `npm install @equibles/ai-sdk` |
 
 Each package wraps the same 14 read-only endpoints of the [REST API](https://equibles.com/docs/api), listed in [spec/tools.json](spec/tools.json). A free API key from [equibles.com/dashboard/apikeys](https://equibles.com/dashboard/apikeys) covers all of them.
 
 ## Development
 
-Each package has its own tests. From a package folder:
+Each package has its own tests. From a Python package folder:
 
 ```bash
 uv venv && uv pip install -e ".[test]"
 .venv/bin/python -m pytest              # unit tests
 EQUIBLES_API_KEY=eq_... .venv/bin/python -m pytest -m live   # against the live API
+```
+
+From `ai-sdk`:
+
+```bash
+npm install && npm test                          # unit tests
+EQUIBLES_API_KEY=eq_... npm run test:live        # against the live API
 ```
 
 The live tests check every wrapped path and parameter against the published OpenAPI document and call each tool once.
