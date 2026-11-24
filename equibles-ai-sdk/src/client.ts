@@ -92,7 +92,7 @@ export class EquiblesClient {
         headers: {
           Authorization: `Bearer ${this.key}`,
           Accept: 'application/json',
-          'User-Agent': '@equibles/ai-sdk',
+          'User-Agent': 'equibles-ai-sdk',
         },
         signal: combine(signal, timeout),
       });

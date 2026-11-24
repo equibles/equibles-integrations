@@ -1,5 +1,5 @@
 {
-  "name": "@equibles/ai-sdk",
+  "name": "equibles-ai-sdk",
   "version": "0.1.0",
   "description": "Vercel AI SDK tools for Equibles: SEC filings, earnings call transcripts, financial statements, prices, insider trades, 13F holders, short interest, guidance and analyst estimates.",
   "keywords": [
@@ -18,7 +18,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/equibles/equibles-integrations.git",
-    "directory": "ai-sdk"
+    "directory": "equibles-ai-sdk"
   },
   "bugs": {
     "url": "https://github.com/equibles/equibles-integrations/issues"

@@ -1,11 +1,11 @@
-# @equibles/ai-sdk
+# equibles-ai-sdk
 
 [Vercel AI SDK](https://ai-sdk.dev) tools for [Equibles](https://equibles.com): search SEC filings and earnings call transcripts, read financial statements, daily prices, insider trades, 13F holders, short interest, company guidance and analyst estimates. Each tool calls the [Equibles REST API](https://equibles.com/docs/api) and returns its JSON, so the model can quote the filing or call a figure came from.
 
 ## Install
 
 ```bash
-npm install @equibles/ai-sdk ai
+npm install equibles-ai-sdk ai
 ```
 
 Works with AI SDK 5, 6 and 7, on Node.js 20.3 or later and other runtimes with `fetch`.
@@ -26,7 +26,7 @@ All tools, sharing one API client:
 
 ```ts
 import { generateText, isStepCount } from 'ai';
-import { equiblesTools } from '@equibles/ai-sdk';
+import { equiblesTools } from 'equibles-ai-sdk';
 
 const { text } = await generateText({
   model: 'anthropic/claude-sonnet-5.5',
@@ -43,7 +43,7 @@ On AI SDK 5 and 6, import `stepCountIs` instead of `isStepCount`. A model string
 Only the tools you need:
 
 ```ts
-import { equiblesTool } from '@equibles/ai-sdk';
+import { equiblesTool } from 'equibles-ai-sdk';
 
 const tools = {
   searchCompanyFilings: equiblesTool('searchCompanyFilings'),
